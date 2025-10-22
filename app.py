@@ -39,63 +39,76 @@ load_dotenv()
 client = configure_gemini()
 MODEL_NAME, MAX_TOKENS = get_model_config()
 
-
-# ============== Vector store loader (güvenli) ==============
+# ============== Vector store loader (otomatik ingest'li) ==============
 @st.cache_resource(show_spinner=False)
 def get_vector_store():
+    """
+    Vektör deposunu yükler. Yoksa bir kez otomatik ingest dener ve tekrar yükler.
+    Başarısız olursa None döner (No-Vector modu).
+    """
+    # 1) Direkt yüklemeyi dene
     try:
         return load_vector_store()
     except Exception as e:
+        # hatayı sakla, otomatik ingest deneyeceğiz
         st.session_state["vector_load_error"] = str(e)
+
+    # 2) Daha önce otomatik ingest denendiyse tekrar deneme
+    if st.session_state.get("auto_ingest_attempted", False):
+        return None
+
+    # 3) Otomatik ingest (bir kez)
+    st.session_state["auto_ingest_attempted"] = True
+    with st.spinner("İlk kurulum: içerikler işleniyor, embeddings oluşturuluyor..."):
+        try:
+            result = subprocess.run(
+                [sys.executable, "ingest.py"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=1200,  # 20 dk üst sınır; ihtiyaca göre ayarlayabilirsin
+            )
+            if result.stdout:
+                st.code(result.stdout, language="bash")
+            if result.returncode != 0:
+                if result.stderr:
+                    st.error("Otomatik ingest başarısız oldu. Ayrıntılar:")
+                    st.code(result.stderr, language="bash")
+                return None
+        except FileNotFoundError:
+            st.error("ingest.py bulunamadı. Yerelde `python ingest.py` çalıştırıp yeniden deploy et.")
+            return None
+        except subprocess.TimeoutExpired:
+            st.error("ingest.py zaman aşımına uğradı.")
+            return None
+        except Exception as e:
+            st.error(f"Otomatik ingest sırasında hata: {e}")
+            return None
+
+    # 4) Başarılıysa tekrar yükle
+    try:
+        return load_vector_store()
+    except Exception as e:
+        st.error(f"Ingest sonrası vektör deposu yine yüklenemedi: {e}")
         return None
 
 
 VECTOR_STORE = get_vector_store()
+NO_VECTOR_MODE = VECTOR_STORE is None
 
-# Vektör deposu yoksa kullanıcıya aksiyon sun
-if VECTOR_STORE is None:
-    st.error("Vektör deposu bulunamadı. Önce embeddings oluşturmalısın.")
+# Üstte bant uyarı (uygulama durmaz)
+if NO_VECTOR_MODE:
+    st.markdown(
+        """
+        <div style="background:#3b1d2a;border:1px solid #6b2b43;color:#ffd5e1;padding:10px 12px;border-radius:8px;margin-bottom:8px;">
+          <strong>Vektör deposu bulunamadı.</strong> Otomatik kurulum denendi ama başarılamadı.
+          Şu an <em>No-Vector</em> modundayız; model genel bilgisiyle yanıt verecek.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     with st.expander("Detay / Log"):
         st.write(st.session_state.get("vector_load_error", ""))
-
-    col1, col2 = st.columns(2)
-    with col1:
-        run_ingest = st.button("📦 Vektör Deposunu Şimdi Oluştur (ingest.py)")
-    with col2:
-        st.markdown(
-            "<div class='transparent-note'>Alternatif: Lokal ortamda <code>python ingest.py</code> çalıştırıp yeniden deploy et.</div>",
-            unsafe_allow_html=True,
-        )
-
-    if run_ingest:
-        with st.spinner("İçerikler işleniyor, embeddings oluşturuluyor..."):
-            try:
-                result = subprocess.run(
-                    [sys.executable, "ingest.py"],
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-                if result.stdout:
-                    st.code(result.stdout, language="bash")
-                if result.returncode != 0:
-                    st.error("ingest.py başarısız oldu. stderr:")
-                    st.code(result.stderr or "", language="bash")
-                else:
-                    st.success("Ingest tamam! Vektör deposu yeniden yükleniyor...")
-                    # cache'i temizle
-                    get_vector_store.clear()
-                    # yeniden yükleyip sayfayı tazele
-                    _ = get_vector_store()
-                    st.rerun()
-            except FileNotFoundError:
-                st.error("ingest.py dosyası bulunamadı. Yerelde `python ingest.py` çalıştırıp yeniden deploy et.")
-            except Exception as e:
-                st.error(f"Beklenmeyen hata: {e}")
-
-    # vektör deposu olmadan devam etmeyelim
-    st.stop()
-
 
 # ============== Sidebar ==============
 st.markdown(
@@ -147,10 +160,9 @@ for m in st.session_state.messages:
     with st.chat_message(m["role"]):
         st.markdown(m["content"])
 
-
 # ============== Retrieval helpers ==============
 def retrieve_with_threshold(query: str, k: int, min_similarity: float):
-    # Emniyet: VECTOR_STORE zaten mevcut; yine de None kontrolü
+    # No-Vector modunda boş dön
     if VECTOR_STORE is None:
         return []
     q_emb = embed_texts(client, [query])[0]
@@ -179,14 +191,15 @@ def retrieve_with_threshold(query: str, k: int, min_similarity: float):
 
 
 def get_contexts(query: str):
+    if VECTOR_STORE is None:
+        return [], False
     # 1) sıkı arama
     ctxs = retrieve_with_threshold(query, top_k, similarity_threshold)
-    # 2) zayıfsa fallback (eşik düşür, k arttır)
+    # 2) zayıfsa fallback
     if len(ctxs) == 0:
         alt = retrieve_with_threshold(query, fallback_top_k, fallback_similarity)
         return alt, True
     return ctxs, False
-
 
 # ============== Modal builder (Kaynak listesi + popup) ==============
 def build_modal_html(ctxs):
@@ -209,7 +222,7 @@ def build_modal_html(ctxs):
         source_label = escape(c.get("source") or "Bilinmiyor")
         page = c.get("page", 1)
         similarity = float(c.get("similarity", 0.0))
-        meta = c.get("metadata") or {}
+        meta = (c.get("metadata") or {})
         question_preview = (meta.get("question") or "").strip()
         answer_preview = (meta.get("answer") or "").strip()
         context_preview = (meta.get("context") or "").strip()
@@ -333,7 +346,6 @@ def build_modal_html(ctxs):
     """
     return full_html
 
-
 # ============== Chat loop ==============
 user_q = st.chat_input("Fintech hakkında sorunu yaz (örn: 'PSD2 nedir?')")
 
@@ -347,7 +359,14 @@ if user_q:
             ctxs, _ = get_contexts(user_q)
 
             if len(ctxs) == 0:
-                answer = "📭 Bu soruya ait içerik veri setimizde bulunamadı."
+                # No-Vector modunda veya bağlam bulunamadığında genel bilgiye izin ver
+                prompt = build_prompt(
+                    user_q,
+                    [],  # bağlam yok
+                    chat_history=st.session_state.messages,
+                    max_history=max_history,
+                    allow_general_knowledge=True,  # bağlam yoksa genel bilgi açık
+                )
             else:
                 prompt = build_prompt(
                     user_q,
@@ -357,28 +376,28 @@ if user_q:
                     allow_general_knowledge=False,
                 )
 
-                resp = client.models.generate_content(
-                    model=MODEL_NAME,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        temperature=temperature,
-                        max_output_tokens=MAX_TOKENS,
-                    ),
-                )
+            resp = client.models.generate_content(
+                model=MODEL_NAME,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=temperature,
+                    max_output_tokens=MAX_TOKENS,
+                ),
+            )
 
-                # sağlam text çıkarımı
-                answer = None
-                if getattr(resp, "text", None):
-                    answer = resp.text
-                elif getattr(resp, "candidates", None):
-                    try:
-                        parts = resp.candidates[0].content.parts
-                        if parts and hasattr(parts[0], "text"):
-                            answer = parts[0].text
-                    except Exception:
-                        pass
-                if not answer:
-                    answer = "⚠️ Modelden metin alınamadı, tekrar deneyebilirim."
+            # sağlam text çıkarımı
+            answer = None
+            if getattr(resp, "text", None):
+                answer = resp.text
+            elif getattr(resp, "candidates", None):
+                try:
+                    parts = resp.candidates[0].content.parts
+                    if parts and hasattr(parts[0], "text"):
+                        answer = parts[0].text
+                except Exception:
+                    pass
+            if not answer:
+                answer = "⚠️ Modelden metin alınamadı, tekrar deneyebilirim."
 
             st.markdown(answer)
             st.session_state.messages.append({"role": "assistant", "content": answer})
@@ -392,7 +411,7 @@ if user_q:
                 st.markdown(
                     """
                     <div class="transparent-note">
-                        🔒 Bu başlık için veri setinden sonuç bulunamadı.
+                        🔒 Bu başlık için veri setinden sonuç bulunamadı (No-Vector modu olabilir).
                     </div>
                     """,
                     unsafe_allow_html=True,
