@@ -117,7 +117,7 @@ st.markdown(
         <div class="hero-icon">💳</div>
         <div>
             <h1>FinAI</h1>
-            <p>Fintech içgörüleri için bellekli, RAG destekli uzman sohbet asistanı.</p>
+            <p>Finansal bilgi için bellekli, RAG destekli uzman sohbet asistanı.</p>
             <div class="hero-badges">
                 <span class="hero-badge">Hybrid Retrieval</span>
                 <span class="hero-badge">Vector Store</span>
@@ -347,7 +347,7 @@ def build_modal_html(ctxs):
     return full_html
 
 # ============== Chat loop ==============
-user_q = st.chat_input("Fintech hakkında sorunu yaz (örn: 'PSD2 nedir?')")
+user_q = st.chat_input("Finansal konular hakkında sorunu yaz (örn: 'Bilanço nedir?')")
 
 if user_q:
     st.session_state.messages.append({"role": "user", "content": user_q})

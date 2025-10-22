@@ -1,7 +1,7 @@
 # 💳 FinAI
 
-Fintech odaklı dokümanları Google Gemini modelleriyle birleştiren hibrit bir
-retrieval-augmented generation (RAG) sohbet uygulaması. ChromaDB üzerinde
+Finansal bilgi odaklı dokümanları Google Gemini modelleriyle birleştiren hibrit
+bir retrieval-augmented generation (RAG) sohbet uygulaması. ChromaDB üzerinde
 kalıcı vektör hafızası tutar, uygun bağlam bulamazsa sohbeti kesmeden Gemini'nin
 genel bilgisinden destek alır.
 
