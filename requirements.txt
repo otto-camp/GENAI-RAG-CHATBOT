@@ -1,0 +1,9 @@
+streamlit
+google-genai
+chromadb
+python-dotenv
+tqdm
+datasets
+# local embedding için
+sentence-transformers
+torch
