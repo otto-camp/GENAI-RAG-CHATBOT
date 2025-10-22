@@ -172,7 +172,7 @@ def build_prompt(
     # rules
     if allow_general_knowledge:
         rules = (
-            "Aşağıda fintech alanına ait veri setlerinden çekilmiş bağlamlar ve sohbet geçmişi var. "
+            "Aşağıda finans alanına ait veri setlerinden çekilmiş bağlamlar ve sohbet geçmişi var. "
             "Önce bağlamı kullanarak cevap ver ve kısa tut (en fazla üç cümle). "
             "Eğer bağlam yetersizse kendi genel bilginle tamamlayabilirsin; ancak bağlamdaki bilgilerle çelişme. "
             "Yanıtı kullanıcının soru sorduğu dilde ver; dil emin değilse Türkçe yanıt kullan. "
@@ -180,7 +180,7 @@ def build_prompt(
         )
     else:
         rules = (
-            "Aşağıda fintech veri setlerinden çekilen bağlamlar ve sohbet geçmişi var. "
+            "Aşağıda finans veri setlerinden çekilen bağlamlar ve sohbet geçmişi var. "
             "Yanıtını yalnızca bağlamdaki bilgiye dayandır ve kısa tut (en fazla üç cümle). "
             "Yanıtı kullanıcının soru sorduğu dilde ver; dil emin değilse Türkçe yanıt kullan. "
             "Başlık, madde işaretleri veya takip sorusu ekleme. "

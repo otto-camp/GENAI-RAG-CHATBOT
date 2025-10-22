@@ -117,7 +117,7 @@ st.markdown(
         <div class="hero-icon">💳</div>
         <div>
             <h1>FinAI</h1>
-            <p>Finansal bilgi için bellekli, RAG destekli uzman sohbet asistanı.</p>
+            <p>Finansal içgörüler için bellekli, RAG destekli uzman sohbet asistanı.</p>
             <div class="hero-badges">
                 <span class="hero-badge">Hybrid Retrieval</span>
                 <span class="hero-badge">Vector Store</span>

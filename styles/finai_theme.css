@@ -1,427 +1,53 @@
-/* =========================================================
-   FinAI Streamlit Theme (Dark + Light)
-   Author: ChatGPT (GPT-5)
-   ========================================================= */
+/* Subtle hero styling; keep rest close to Streamlit defaults */
 
-/* ======================
-   BASE STYLING (COMMON)
-   ====================== */
-.stApp {
-    background: radial-gradient(120% 120% at 0% 0%, rgba(79, 70, 229, 0.25), transparent 55%),
-        radial-gradient(120% 120% at 100% 0%, rgba(45, 212, 191, 0.12), transparent 40%),
-        #050c1c;
-    color: #e2e8f0;
-    transition: background 0.4s ease, color 0.4s ease;
+:root {
+  color-scheme: light dark;
 }
 
-.block-container {
-    padding: 24px 40px 80px;
-    margin-left: auto;
-    margin-right: auto;
+.stApp .hero-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.4rem 1.6rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08),
+    rgba(14, 165, 233, 0.04)
+  );
+  box-shadow: 0 12px 22px rgba(15, 23, 42, 0.08);
 }
 
-@media (max-width: 768px) {
-    .block-container {
-        padding: 16px 20px 60px;
-    }
+.stApp .hero-card h1,
+.stApp .hero-card p {
+  margin: 0;
 }
 
-.hero-card {
-    background: linear-gradient(120deg, rgba(14, 116, 144, 0.85), rgba(30, 64, 175, 0.9));
-    padding: 26px 32px;
-    border-radius: 26px;
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    margin-bottom: 1.25rem;
-    border: 1px solid rgba(94, 234, 212, 0.35);
-    box-shadow: 0 28px 60px rgba(15, 23, 42, 0.45);
-    transition: all 0.4s ease;
+.stApp .hero-icon {
+  font-size: 2.4rem;
+  line-height: 1;
 }
 
-.hero-icon {
-    font-size: 44px;
-    background: rgba(15, 23, 42, 0.35);
-    border-radius: 18px;
-    padding: 18px 20px;
-    line-height: 1;
-    color: #f8fafc;
-    transition: background 0.4s ease, color 0.3s ease;
+.stApp .hero-badge {
+  padding: 0.2rem 0.75rem;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background-color: rgba(255, 255, 255, 0.55);
 }
 
-.hero-card h1 {
-    margin: 0;
-    font-size: 38px;
-    letter-spacing: 0.02em;
-    color: #f8fafc;
+html[data-theme="dark"] .stApp .hero-card {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.16),
+    rgba(59, 130, 246, 0.12)
+  );
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.45);
 }
 
-.hero-card p {
-    margin: 8px 0 16px;
-    font-size: 16px;
-    color: rgba(241, 245, 249, 0.9);
-}
-
-.hero-badges {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.hero-badge {
-    background: rgba(15, 23, 42, 0.35);
-    border: 1px solid rgba(148, 163, 184, 0.35);
-    color: #e0f2fe;
-    padding: 4px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    transition: all 0.4s ease;
-}
-
-.meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 12px;
-}
-
-.meta-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
-    opacity: 0.85;
-}
-
-.meta-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(15, 23, 42, 0.55);
-    border: 1px solid rgba(94, 234, 212, 0.35);
-    color: #f8fafc;
-    border-radius: 16px;
-    padding: 6px 14px;
-    font-size: 14px;
-    font-weight: 600;
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.35);
-    transition: all 0.4s ease;
-}
-
-.stMarkdown a {
-    color: #5eead4;
-    text-decoration: none;
-}
-
-blockquote {
-    background: rgba(15, 23, 42, 0.5);
-    border-left: 3px solid #5eead4;
-    padding: 12px 18px;
-    border-radius: 0 14px 14px 0;
-    color: rgba(226, 232, 240, 0.88);
-    transition: all 0.4s ease;
-}
-
-/* CHAT MESSAGES */
-[data-testid="stChatMessageUser"] {
-    background: rgba(94, 234, 212, 0.12);
-    border: 1px solid rgba(94, 234, 212, 0.35);
-    border-radius: 18px;
-    padding: 18px;
-    margin-bottom: 12px;
-    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.1);
-    transition: all 0.4s ease;
-}
-
-[data-testid="stChatMessageAssistant"] {
-    background: rgba(59, 130, 246, 0.12);
-    border: 1px solid rgba(59, 130, 246, 0.25);
-    border-radius: 18px;
-    padding: 18px;
-    margin-bottom: 12px;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
-    transition: all 0.4s ease;
-}
-
-[data-testid="stChatMessage"] pre {
-    background: rgba(15, 23, 42, 0.7) !important;
-    border-radius: 12px;
-}
-
-/* CHAT INPUT */
-div[data-testid="stChatInput"] {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(14, 116, 144, 0.45));
-    border: 1px solid rgba(94, 234, 212, 0.3);
-    border-radius: 24px;
-    padding: 16px 20px;
-    color: #e2e8f0;
-    box-shadow: 0 25px 45px rgba(2, 6, 23, 0.55);
-    transition: all 0.3s ease;
-}
-
-div[data-testid="stChatInput"]::before {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    border-radius: 26px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.45), rgba(94, 234, 212, 0.35));
-    opacity: 0.35;
-    z-index: -1;
-    filter: blur(12px);
-}
-
-div[data-testid="stChatInput"] textarea {
-    background: transparent;
-    border: none;
-    resize: none;
-    box-shadow: none;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: inherit;
-    padding: 0;
-}
-
-div[data-testid="stChatInput"] textarea:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-div[data-testid="stChatInput"] textarea::placeholder {
-    color: rgba(226, 232, 240, 0.55);
-}
-
-div[data-testid="stChatInput"] button {
-    background: linear-gradient(135deg, #2563eb, #0ea5e9);
-    border: none;
-    color: #f8fafc;
-    border-radius: 999px !important;
-    padding: 10px 18px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    box-shadow: 0 12px 25px rgba(14, 165, 233, 0.35);
-    transition: all 0.2s ease;
-}
-
-div[data-testid="stChatInput"] button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 16px 32px rgba(14, 165, 233, 0.45);
-}
-
-div[data-testid="stChatInput"] button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.5);
-}
-
-/* CONTEXT CHIPS */
-.context-chip {
-    border: 1px solid rgba(94, 234, 212, 0.35);
-    background: rgba(15, 23, 42, 0.45);
-    padding: 14px 16px;
-    border-radius: 14px;
-    margin-bottom: 10px;
-    color: #f8fafc;
-    box-shadow: 0 16px 28px rgba(8, 15, 40, 0.35);
-}
-
-.context-title {
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.context-meta {
-    font-size: 12px;
-    color: rgba(148, 163, 184, 0.9);
-}
-
-.context-snippet {
-    margin-top: 6px;
-    font-size: 13px;
-    line-height: 1.45;
-    opacity: 0.85;
-}
-
-.transparent-note {
-    background: rgba(15, 23, 42, 0.55);
-    border-left: 3px solid #5eead4;
-    padding: 12px 16px;
-    border-radius: 0 12px 12px 0;
-    font-size: 13px;
-    color: rgba(226, 232, 240, 0.88);
-    transition: all 0.4s ease;
-}
-
-/* ======================
-   DARK THEME
-   ====================== */
-html[data-theme="dark"] {
-    color-scheme: dark;
-}
-
-html[data-theme="dark"] .stApp h1,
-html[data-theme="dark"] .stApp h2,
-html[data-theme="dark"] .stApp h3,
-html[data-theme="dark"] .stApp h4 {
-    color: #f8fafc;
-}
-
-html[data-theme="dark"] div[data-testid="stSidebar"] {
-    background: rgba(9, 14, 33, 0.96);
-    border-right: 1px solid rgba(94, 234, 212, 0.25);
-    backdrop-filter: blur(14px);
-    color: #e2e8f0;
-}
-
-html[data-theme="dark"] .meta-label {
-    color: rgba(148, 163, 184, 0.82);
-}
-
-/* ======================
-   LIGHT THEME
-   ====================== */
-html[data-theme="light"],
-html[data-theme="light"] body {
-  background: #f8fafc !important;
-  color: #0f172a !important;
-}
-
-html[data-theme="light"] {
-    color-scheme: light;
-}
-
-html[data-theme="light"] .stApp {
-    background: radial-gradient(120% 140% at 0% -20%, rgba(148, 197, 253, 0.35), transparent 55%),
-        radial-gradient(150% 120% at 100% -10%, rgba(167, 243, 208, 0.32), transparent 55%),
-        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%) !important;
-    color: #0f172a !important;
-}
-
-html[data-theme="light"] [data-testid="stAppViewContainer"],
-html[data-theme="light"] [data-testid="stHeader"] {
-    background: transparent !important;
-}
-
-html[data-theme="light"] .stApp h1,
-html[data-theme="light"] .stApp h2,
-html[data-theme="light"] .stApp h3,
-html[data-theme="light"] .stApp h4,
-html[data-theme="light"] .stApp p,
-html[data-theme="light"] .stApp li,
-html[data-theme="light"] .stApp span,
-html[data-theme="light"] .stMarkdown {
-    color: #0f172a !important;
-}
-
-html[data-theme="light"] .stMarkdown a {
-    color: #1d4ed8 !important;
-    text-decoration: none;
-}
-
-/* Hero */
-html[data-theme="light"] .hero-card {
-    background: linear-gradient(120deg, rgba(59,130,246,0.88), rgba(14,165,233,0.78)) !important;
-    border: 1px solid rgba(37,99,235,0.25) !important;
-    box-shadow: 0 26px 60px rgba(148,163,184,0.35);
-    color: #0f172a !important;
-}
-html[data-theme="light"] .hero-card h1,
-html[data-theme="light"] .hero-card p {
-    color: #0f172a !important;
-}
-html[data-theme="light"] .hero-icon {
-    background: rgba(255,255,255,0.55) !important;
-    color: #0f172a !important;
-}
-html[data-theme="light"] .hero-badge {
-    background: rgba(255,255,255,0.64) !important;
-    border: 1px solid rgba(37,99,235,0.25) !important;
-    color: #1e3a8a !important;
-}
-
-/* Meta pills */
-html[data-theme="light"] .meta-label { color: rgba(71,85,105,0.8) !important; }
-html[data-theme="light"] .meta-pill {
-    background: rgba(255,255,255,0.88) !important;
-    border: 1px solid rgba(59,130,246,0.25) !important;
-    color: #0f172a !important;
-    box-shadow: 0 14px 26px rgba(148,163,184,0.25);
-}
-
-/* Blockquote */
-html[data-theme="light"] blockquote {
-    background: rgba(226,232,240,0.75) !important;
-    border-left: 3px solid #2563eb !important;
-    color: rgba(30,41,59,0.85) !important;
-}
-
-/* Chat bubbles */
-html[data-theme="light"] [data-testid="stChatMessageUser"] {
-    background: rgba(37,99,235,0.12) !important;
-    border: 1px solid rgba(37,99,235,0.22) !important;
-    box-shadow: 0 10px 30px rgba(37,99,235,0.12) !important;
-    color: #0f172a !important;
-}
-html[data-theme="light"] [data-testid="stChatMessageAssistant"] {
-    background: rgba(16,185,129,0.12) !important;
-    border: 1px solid rgba(16,185,129,0.25) !important;
-    box-shadow: 0 10px 30px rgba(16,185,129,0.12) !important;
-    color: #0f172a !important;
-}
-html[data-theme="light"] [data-testid="stChatMessage"] pre {
-    background: rgba(241,245,249,0.95) !important;
-    color: #0f172a !important;
-}
-
-/* Chat input */
-html[data-theme="light"] div[data-testid="stChatInput"] {
-    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(226,232,240,0.9)) !important;
-    border: 1px solid rgba(59,130,246,0.28) !important;
-    color: #0f172a !important;
-    box-shadow: 0 24px 48px rgba(148,163,184,0.28);
-}
-html[data-theme="light"] div[data-testid="stChatInput"] textarea {
-    color: #0f172a !important;
-}
-html[data-theme="light"] div[data-testid="stChatInput"] textarea::placeholder {
-    color: rgba(15,23,42,0.45) !important;
-}
-
-/* Sidebar */
-html[data-theme="light"] div[data-testid="stSidebar"] {
-    background: rgba(255,255,255,0.92) !important;
-    border-right: 1px solid rgba(37,99,235,0.18) !important;
-    backdrop-filter: blur(20px);
-    color: #0f172a !important;
-}
-
-/* Context + notes */
-html[data-theme="light"] .context-chip {
-    border: 1px solid rgba(59,130,246,0.2) !important;
-    background: rgba(255,255,255,0.92) !important;
-    color: #0f172a !important;
-    box-shadow: 0 16px 32px rgba(148,163,184,0.28);
-}
-html[data-theme="light"] .context-meta {
-    color: rgba(71,85,105,0.95) !important;
-}
-html[data-theme="light"] .transparent-note {
-    background: rgba(226,232,240,0.78) !important;
-    border-left: 3px solid #2563eb !important;
-    color: rgba(30,41,59,0.88) !important;
-}
-
-/* ======================
-   HOVER / UTILITY
-   ====================== */
-.hero-badge:hover {
-    transform: translateY(-1px);
-}
-
-.context-chip:hover {
-    transform: translateY(-2px);
+html[data-theme="dark"] .stApp .hero-badge {
+  border-color: rgba(255, 255, 255, 0.24);
+  background-color: rgba(15, 23, 42, 0.55);
 }

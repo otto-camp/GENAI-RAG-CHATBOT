@@ -1,37 +1,45 @@
 # 💳 FinAI
 
-Finansal bilgi odaklı dokümanları Google Gemini modelleriyle birleştiren hibrit
-bir retrieval-augmented generation (RAG) sohbet uygulaması. ChromaDB üzerinde
-kalıcı vektör hafızası tutar, uygun bağlam bulamazsa sohbeti kesmeden Gemini'nin
-genel bilgisinden destek alır.
+Finansal karar destek senaryolarına odaklanan, Google Gemini modelleriyle çalışan
+retrieval-augmented generation (RAG) sohbet asistanı. Hugging Face üzerindeki finans
+veri setleri vektörleştirilip hafif bir dosya tabanlı depo (`vector_store/`) içinde
+tutuluyor; bağlam bulunamazsa model kontrollü şekilde genel bilgisini kullanıyor.
 
-## ✨ Özellikler
-- 💬 Streamlit tabanlı sohbet arayüzü (`app.py`)
-- 🧠 Hibrit bağlam seçimi: sıkı eşik + fallback araması
-- 🧵 Sohbet geçmişi (`max_history`) ve bağlamlara göre prompt inşası
-- 🗂️ ChromaDB ile kalıcı vektör deposu
-- 🧮 Embedding sağlayıcısı olarak Gemini (`text-embedding-004`) veya yerel
-  `sentence-transformers` modeli
-- 📚 HF veri setleri: `financial_phrasebank` ve `banking77`
+https://finai-gemini.streamlit.app/
+
+## ✨ Öne Çıkanlar
+- 💬 Streamlit tabanlı sohbet arayüzü (`app.py`) ve hafif tema dokunuşu (`styles/finai_theme.css`)
+- 🧠 Hibrit arama: sıkı benzerlik eşiği + ihtiyaç duyulduğunda fallback taraması
+- 🗂️ Dosya tabanlı vektör deposu (NumPy + JSONL) ve ilk açılışta otomatik ingest denemesi
+- 🔁 Sohbet geçmişi, bağlam ve kurallarla dinamik prompt üretimi (`rag_utils.build_prompt`)
+- 🔌 İki embedding modu: yerel `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`
+  veya Gemini `text-embedding-004`
+- 📚 Finans odaklı kaynaklar:
+  - `Josephgflowers/Finance-Instruct-500k`
+  - `gretelai/synthetic_pii_finance_multilingual`
+  - (Opsiyonel) `CFPB/consumer-finance-complaints`
 
 ## 🗃️ Proje Yapısı
 ```text
 FinAI/
-├─ app.py               # Streamlit sohbet arayüzü
-├─ ingest.py            # Hugging Face verilerini ChromaDB'ye aktarma betiği
-├─ rag_utils.py         # Gemini yapılandırması, embedding ve prompt yardımcıları
-├─ requirements.txt     # Python bağımlılıkları
-├─ .env.example         # Ortam değişkenleri için şablon
-├─ chroma/              # Kalıcı vektör veritabanı (ingest sonrası oluşur)
-└─ venv/                # (Opsiyonel) Proje sanal ortamı
+├─ app.py                 # Streamlit sohbet arayüzü ve RAG akışı
+├─ ingest.py              # Finans veri setlerini işleyip vector_store'a yazar
+├─ rag_utils.py           # Gemini istemcisi, embedding yardımcıları ve prompt kuralları
+├─ styles/
+│  └─ finai_theme.css     # Hero alanı için hafif tema
+├─ vector_store/          # ingest sonrası oluşur (embeddings.npy + documents.jsonl)
+├─ requirements.txt       # Python bağımlılıkları
+└─ .env.example           # Ortam değişkeni şablonu
 ```
 
+> `vector_store/` klasörü repo içinde tutulmaz; ingest çalışınca oluşturulur.
+
 ## ⚙️ Kurulum
-1. Projeyi klonlayın ve dizine girin.
-2. Sanal ortam oluşturun:
+1. Depoyu klonlayın ve dizine girin.
+2. (Önerilen) Sanal ortam kurun:
    ```bash
    python -m venv venv
-   source venv/bin/activate  # Windows için: venv\Scripts\activate
+   source venv/bin/activate     # Windows: venv\Scripts\activate
    ```
 3. Bağımlılıkları yükleyin:
    ```bash
@@ -39,63 +47,60 @@ FinAI/
    ```
 
 ## 🔐 Ortam Değişkenleri
-1. `.env.example` dosyasını `.env` olarak kopyalayın:
-   ```bash
-   cp .env.example .env
-   ```
-2. Aşağıdaki alanları doldurun:
-   - `GOOGLE_API_KEY`: Gemini API anahtarınız
-   - `GOOGLE_LLM_MODEL`: Varsayılan `models/gemini-2.0-flash`
-   - `GOOGLE_MAX_OUTPUT_TOKENS`: Yanıt uzunluğu sınırı (varsayılan 512)
-   - Embed ayarları:
-     - `EMBED_PROVIDER`: `local` (varsayılan) veya `gemini`
-     - `HF_LIMIT`: Her veri setinden çekilecek maksimum doküman sayısı
-     - `EMBED_BATCH_SIZE` ve `EMBED_SLEEP_BETWEEN`: Yerel/Gemini embedding
-       sırasında hız limitini ayarlamak için
+`.env.example` dosyasını `.env` olarak kopyalayın ve değerleri düzenleyin.
+
+```bash
+cp .env.example .env
+```
+
+- **Gemini**
+  - `GOOGLE_API_KEY`: Zorunlu
+  - `GOOGLE_LLM_MODEL`: Varsayılan `models/gemini-2.0-flash`
+  - `GOOGLE_MAX_OUTPUT_TOKENS`: Maksimum token sayısı (varsayılan 512)
+- **Embedding & veri**
+  - `EMBED_PROVIDER`: `local` (varsayılan) veya `gemini`
+  - `HF_LIMIT`: Her veri setinden alınacak maksimum kayıt (≤0 ise limitsiz)
+  - `EMBED_BATCH_SIZE`: Yerel model için toplu iş boyutu
+  - `EMBED_SLEEP_BETWEEN`: Gemini embed modunda istekler arası bekleme
+  - `INCLUDE_CFPB_DATASET`: `true/false` (isteğe bağlı şikayet verisi)
+  - `HF_DATASETS_OFFLINE`: `1` setlenirse Hugging Face cache’inden okur
 
 ## 📥 Veri Hazırlama (Ingest)
-ChromaDB deposunu doldurmak için:
+Hugging Face veri setlerini indirip vektör deposu oluşturmak için:
+
 ```bash
 python ingest.py
 ```
 
-Betik Hugging Face üzerinden iki veri seti indirir, normalize eder ve seçilen
-embedding sağlayıcısıyla vektörleştirip `chroma/` klasörüne kaydeder. İlk
-çalıştırmada indirmeler internet bağlantısı gerektirir. `EMBED_PROVIDER=gemini`
-seçilirse hız limitlerine takılmamak için API anahtarınızın geçerli olduğundan
-emin olun.
+Komut:
+- Verileri normalize eder ve tekrar eden kayıtları temizler.
+- Seçilen embedding sağlayıcısıyla vektörleri üretir (384 boyutlu).
+- `vector_store/embeddings.npy` ve `vector_store/documents.jsonl` dosyalarını oluşturur.
+
+`app.py` ilk çalıştırmada depo bulunamazsa aynı betiği otomatik çağırır. Başarısız olursa
+uygulama “No-Vector” modunda Gemini’nin genel bilgisini kullanarak devam eder.
 
 ## 🚀 Uygulamayı Çalıştırma
-Streamlit arayüzünü başlatmak için:
 ```bash
 streamlit run app.py
 ```
 
-Uygulama:
-- Google Gemini API'sini yapılandırır (`configure_gemini`)
-- ChromaDB'den bağlamları çeker (`get_contexts`, `retrieve_with_threshold`)
-- Sohbet geçmişi + bağlamlarla prompt oluşturur (`build_prompt`)
-- Gemini'den yanıt üretir ve kullanılan kaynakları listeler
+Arayüz:
+- Gemini istemcisini yapılandırır (`configure_gemini`).
+- Vektör deposundan bağlam çeker (`get_contexts` + `retrieve_with_threshold`).
+- Sohbet geçmişi ve kurallarla prompt üretir (`build_prompt`).
+- Yanıtı ve kullanılan kaynakları sohbet penceresinde listeler.
 
-Yan çubuktaki ayarlarla benzerlik eşiği, fallback parametreleri, sıcaklık ve
-hafıza uzunluğunu anlık değiştirebilirsiniz.
+Yan çubuktan benzerlik eşikleri, fallback parametreleri, sıcaklık ve hafıza uzunluğu gibi
+ayarları canlı olarak güncelleyebilirsiniz.
 
-## 🛠️ Geliştirme Notları
-- Chroma deposunu sıfırlamak için `chroma/` klasörünü silerek ingest'i tekrar
-  çalıştırabilirsiniz.
-- Yerel embedding modeli (`sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`)
-  384 boyutlu vektörler üretir; ilk kullanımda model indirileceğinden biraz süre
-  alabilir.
-- `rag_utils.py` dosyası ortak yardımcıları (Gemini istemcisi, embedding
-  fonksiyonları ve prompt kuralları) barındırır.
+## 🛠️ Notlar & İpuçları
+- Vektör deposunu sıfırlamak için `vector_store/` klasörünü silip ingest’i yeniden çalıştırın.
+- Yerel embedding modeli ilk kez indirileceği için birkaç yüz MB’lık indirme sürebilir.
+- `HF_DATASETS_OFFLINE=1` ile veri setlerini önceden indirilmiş cache’den kullanabilirsiniz.
+- Streamlit, yeni mesaj geldiğinde otomatik olarak en son bağlamları getirir; manuel yenilemeye gerek yoktur.
 
 ## 🧰 Sorun Giderme
-- `GOOGLE_API_KEY bulunamadı` hatası alırsanız `.env` dosyasını kontrol edin ve
-  uygulamayı yeniden başlatmadan önce `load_dotenv()` çağrısının anahtarı
-  görebildiğinden emin olun.
-- Hugging Face veri seti indirme hataları kritik değildir; betik kalan
-  veri setleriyle devam eder. Daha fazla bağlam isterseniz komut satırında
-  tekrar çalıştırabilirsiniz.
-- Streamlit arayüzü bağlam bulamazsa yanıtın sonunda modelin genel bilgilerden
-  yararlandığını belirten not eklenir; bu davranış `build_prompt` içinde
-  kontrol edilir.
+- `GOOGLE_API_KEY bulunamadı` hatası `.env` dosyasının yüklenmediğini gösterir; `load_dotenv()` çağrısı için çalışma dizininin doğru olduğundan emin olun.
+- Hugging Face indirmeleri başarısız olursa betik uyarı verir ve eldeki verilerle devam eder; temiz bir başlangıç için tekrar çalıştırın.
+- “No-Vector” modu uyarısı görürseniz `python ingest.py` komutunu manuel çalıştırarak ayrıntılı hatayı görebilirsiniz.
